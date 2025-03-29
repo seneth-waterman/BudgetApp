@@ -1,54 +1,529 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4285f4">
-    <title>Simple Counter</title>
+    <meta name="theme-color" content="#4CAF50">
+    <title>Budget Tracker</title>
     <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #f5f5f5; }
-        button { padding: 10px 20px; font-size: 16px; background-color: #4285f4; color: white; border: none; border-radius: 4px; }
-        #count { font-size: 60px; margin: 20px; }
-        .app-container { max-width: 300px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+            --background-color: #f5f5f5;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-radius: 10px;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .card {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .summary-card {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        h1, h2, h3 {
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .expense-item:last-child {
+            border-bottom: none;
+        }
+        .expense-amount {
+            font-weight: bold;
+        }
+        .expense-date {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        .expense-category {
+            background-color: #f0f0f0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .expenses-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            background-color: #e0e0e0;
+            cursor: pointer;
+        }
+        .tab:first-child {
+            border-top-left-radius: var(--border-radius);
+            border-bottom-left-radius: var(--border-radius);
+        }
+        .tab:last-child {
+            border-top-right-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .month-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .month-selector button {
+            width: auto;
+            padding: 0.5rem;
+        }
+        .category-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 10px;
+        }
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+        .expense-left {
+            flex: 1;
+        }
+        .expense-right {
+            display: flex;
+            align-items: center;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .notification.show {
+            opacity: 1;
+        }
+        @media (max-width: 480px) {
+            .card {
+                padding: 1rem;
+            }
+        }
     </style>
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNpbXBsZSBDb3VudGVyIiwKICAic2hvcnRfbmFtZSI6ICJDb3VudGVyIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmNWY1ZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjNDI4NWY0IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQRDk0Yld3Z2RtVnljMmx2YmowaU1TNHdJaUJsYm1OdlpHbHVaejBpZFhSbUxUZ2lQejQ4YzNabklIZHBaSFJvUFNJeE1EQWlJR2hsYVdkb2REMGlNVEF3SWlCMmFXVjNRbTk0UFNJd0lEQWdNVEF3SURFd01DSWdabWxzYkQwaWJtOXVaU0lnZUcxc2JuTTlJbWgwZEhBNkx5OTNkM2N1ZHpNdWIzSm5Mekl3TURBdmMzWm5JajQ4Y21WamRDQjNhV1IwYUQwaU1UQXdJaUJvWldsbmFIUTlJakV3TUNJZ1ptbHNiRDBpZFhKc0tDTm1iM0p0S1NJZ2MzUnliMnRsUFNKaWJHRmpheUlnYzNSeWIydGxMWGRwWkhSb1BTSXpJaUJ6ZEhKdmEyVXRhR1ZwWjJoMFBTSXpJajQ4TDNKbFkzUStQSEJoZEdnZ1ptbHNiQzF5ZFd4bFBTSmxkbVZ1SWlCamJHbHdMWEoxYkdVOUltVjJaVzVrYjJSa0lpQmtQU0pOTlRBdU5Dd3lOUzQwWXkweExqUXNNQzQzTFRNc01TNHpMVFF1TkN3eUxqUm9MVEUyTGpoakxURXVOQzB3TGpjdE15MHhMak10TkM0MExUSXVORXcxTUM0MExESTFMalJhSWo0OEwzQmhkR2crUEdScFozUWdZMnhoYzNNOUltSjFkSFJ2YmlJZ1ltRmphMmR5YjNWdVpEMGlJelF5T0RWbU5DSWdZMjlzYjNJOUluZG9hWFJsSWo0dEt6d3ZaR2xuZEQ0OEwzTjJaejQ9IiwKICAgICAgInNpemVzIjogIjE0NHgxNDQiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkJ1ZGdldCBUcmFja2VyIiwKICAic2hvcnRfbmFtZSI6ICJCdWRnZXQiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2Y1ZjVmNSIsCiAgInRoZW1lX2NvbG9yIjogIiM0Q0FGNTAiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBEOTRiV3dnZG1WeWMybHZiajBpTVM0d0lpQmxibU52WkdsdVp6MGlkWFJtTFRnaVB6NDhZMjl1ZEdWdWRENGdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lEeDBhWFJzWlQ1Q2RXUm5aWFEvUEM5MGFYUnNaVDQ4Wm1sc2JENTFjbXdvSTJadmNtMGlLVHd2Wm1sc2JENDRIU0EvUGp3dlkyOXVkR1Z1ZEQ0PSIsCiAgICAgICJzaXplcyI6ICIxNDR4MTQ0IiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
 </head>
 <body>
-    <div class="app-container">
-        <h1>Seneth Counter</h1>
-        <div id="count">0</div>
-        <button onclick="incrementCount()">Click Me</button>
-        <p style="margin-top: 20px; font-size: 12px; color: #777;">Add to home screen to install as app</p>
+    <div class="header">
+        <h1>Cash Track</h1>
     </div>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('expenses')">Expenses</div>
+            <div class="tab" onclick="showTab('reports')">Reports</div>
+            <div class="tab" onclick="showTab('settings')">Settings</div>
+        </div>
+        
+        <div id="expenses" class="tab-content active">
+            <div class="card summary-card">
+                <h2>Monthly Summary</h2>
+                <div class="month-selector">
+                    <button onclick="previousMonth()">&lt;</button>
+                    <h3 id="current-month">March 2025</h3>
+                    <button onclick="nextMonth()">&gt;</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.9rem;">Total Spent</div>
+                        <div style="font-size: 1.8rem; font-weight: bold;">$<span id="month-total">0.00</span></div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.9rem;">Budget</div>
+                        <div style="font-size: 1.8rem; font-weight: bold;">$<span id="month-budget">0.00</span></div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <div style="height: 8px; background-color: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden;">
+                        <div id="budget-progress" style="height: 100%; width: 0%; background-color: white; transition: width 0.3s;"></div>
+                    </div>
+                    <div style="text-align: right; margin-top: 0.5rem; font-size: 0.9rem;">
+                        $<span id="budget-remaining">0.00</span> remaining
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Add Expense</h2>
+                <form id="expense-form">
+                    <div class="form-group">
+                        <label for="expense-amount">Amount ($)</label>
+                        <input type="number" id="expense-amount" required min="0.01" step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-category">Category</label>
+                        <select id="expense-category" required>
+                            <option value="">Select a category</option>
+                            <option value="Food">Food</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Housing">Housing</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-description">Description (optional)</label>
+                        <input type="text" id="expense-description" placeholder="What was this for?">
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-date">Date</label>
+                        <input type="date" id="expense-date" required>
+                    </div>
+                    <button type="submit">Add Expense</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2>Recent Expenses</h2>
+                <div id="expenses-list" class="expenses-list">
+                    <!-- Expenses will be populated here -->
+                    <div class="expense-item" style="text-align: center; color: #777;">
+                        No expenses added yet
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="reports" class="tab-content">
+            <div class="card">
+                <h2>Spending by Category</h2>
+                <div class="month-selector">
+                    <button onclick="previousMonth('reports')">&lt;</button>
+                    <h3 id="report-month">March 2025</h3>
+                    <button onclick="nextMonth('reports')">&gt;</button>
+                </div>
+                <div id="category-breakdown">
+                    <!-- Category breakdown will be populated here -->
+                    <div style="text-align: center; color: #777; padding: 1rem;">
+                        No expenses added yet
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h2>Budget Settings</h2>
+                <div class="form-group">
+                    <label for="monthly-budget">Monthly Budget ($)</label>
+                    <input type="number" id="monthly-budget" min="1" step="1" placeholder="Enter your monthly budget">
+                </div>
+                <button onclick="saveSettings()">Save Settings</button>
+            </div>
+            
+            <div class="card">
+                <h2>App Data</h2>
+                <button onclick="clearAllData()" style="background-color: #f44336;">Reset All Data</button>
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #777; text-align: center;">
+                    This will delete all your expenses and settings
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
 
     <script>
-        // Counter functionality
-        let count = 0;
-        
-        function incrementCount() {
-            count++;
-            document.getElementById('count').textContent = count;
-            // Save count to localStorage
-            localStorage.setItem('counterValue', count);
-        }
-        
-        // Load saved count
-        window.onload = function() {
-            const savedCount = localStorage.getItem('counterValue');
-            if (savedCount !== null) {
-                count = parseInt(savedCount);
-                document.getElementById('count').textContent = count;
-            }
+        // Initialize the app data
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        let settings = JSON.parse(localStorage.getItem('settings')) || {
+            monthlyBudget: 1000
         };
         
-        // Register service worker for PWA functionality
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZnVuY3Rpb24oZXZlbnQpIHsKICBldmVudC53YWl0VW50aWwoc2VsZi5za2lwV2FpdGluZygpKTsKfSk7CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJywgZnVuY3Rpb24oZXZlbnQpIHsKICBldmVudC5yZXNwb25kV2l0aChmZXRjaChldmVudC5yZXF1ZXN0KSk7Cn0pOw==')
-                .then(function() {
-                    console.log('Service Worker Registered');
-                });
+        // Initialize the date input to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            document.getElementById('expense-date').value = dateString;
+            document.getElementById('monthly-budget').value = settings.monthlyBudget;
+            
+            updateCurrentMonth();
+            updateExpensesList();
+            updateReports();
+        });
+        
+        // Handle form submission
+        document.getElementById('expense-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const category = document.getElementById('expense-category').value;
+            const description = document.getElementById('expense-description').value;
+            const date = document.getElementById('expense-date').value;
+            
+            // Add the expense
+            const expense = {
+                id: Date.now(), // Unique ID for the expense
+                amount,
+                category,
+                description,
+                date
+            };
+            
+            expenses.push(expense);
+            saveExpenses();
+            
+            // Reset the form
+            document.getElementById('expense-amount').value = '';
+            document.getElementById('expense-description').value = '';
+            
+            // Update the UI
+            updateExpensesList();
+            updateReports();
+            showNotification('Expense added successfully');
+        });
+        
+        // Save expenses to localStorage
+        function saveExpenses() {
+            localStorage.setItem('expenses', JSON.stringify(expenses));
         }
-    </script>
-</body>
-</html>
+        
+        // Update the expenses list
+        function updateExpensesList() {
+            const currentMonth = getCurrentMonth();
+            const expensesList = document.getElementById('expenses-list');
+            const monthExpenses = getExpensesForMonth(currentMonth.year, currentMonth.month);
+            
+            if (monthExpenses.length === 0) {
+                expensesList.innerHTML = `
+                    <div class="expense-item" style="text-align: center; color: #777;">
+                        No expenses for ${getMonthName(currentMonth.month)} ${currentMonth.year}
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort expenses by date (newest first)
+            monthExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            let html = '';
+            for (const expense of monthExpenses) {
+                const date = new Date(expense.date);
+                html += `
+                    <div class="expense-item">
+                        <div class="expense-left">
+                            <div>${expense.description || expense.category}</div>
+                            <div class="expense-date">${formatDate(date)}</div>
+                        </div>
+                        <div class="expense-right">
+                            <span class="expense-category">${expense.category}</span>
+                            <span class="expense-amount" style="margin: 0 10px;">$${expense.amount.toFixed(2)}</span>
+                            <button class="delete-btn" onclick="deleteExpense(${expense.id})">×</button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            expensesList.innerHTML = html;
+            
+            // Update the monthly total
+            const total = monthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+            document.getElementById('month-total').textContent = total.toFixed(2);
+            
+            // Update budget progress
+            document.getElementById('month-budget').textContent = settings.monthlyBudget.toFixed(2);
+            const remaining = settings.monthlyBudget - total;
+            document.getElementById('budget-remaining').textContent = remaining.toFixed(2);
+            
+            // Update the progress bar
+            const progressPercentage = Math.min(100, (total / settings.monthlyBudget) * 100);
+            document.getElementById('budget-progress').style.width = `${progressPercentage}%`;
+        }
+        
+        // Delete an expense
+        function deleteExpense(id) {
+            expenses = expenses.filter(expense => expense.id !== id);
+            saveExpenses();
+            updateExpensesList();
+            updateReports();
+            showNotification('Expense deleted');
+        }
+        
+        // Get expenses for a specific month
+        function getExpensesForMonth(year, month) {
+            return expenses.filter(expense => {
+                const date = new Date(expense.date);
+                return date.getFullYear() === year && date.getMonth() === month;
+            });
+        }
+        
+        // Format date as "Mar 29"
+        function formatDate(date) {
+            const options = { month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+        
+        // Get the current month object
+        function getCurrentMonth() {
+            const currentMonthStr = document.getElementById('current-month').textContent;
+            const [monthName, year] = currentMonthStr.split(' ');
+            return {
+                month: getMonthNumber(monthName),
+                year: parseInt(year)
+            };
+        }
+        
+        // Update the current month display
+        function updateCurrentMonth() {
+            const today = new Date();
+            document.getElementById('current-month').textContent = `${getMonthName(today.getMonth())} ${today.getFullYear()}`;
+            document.getElementById('report-month').textContent = `${getMonthName(today.getMonth())} ${today.getFullYear()}`;
+        }
+        
+        // Previous month
+        function previousMonth(tab = 'expenses') {
+            const monthElement = tab === 'reports' ? 'report-month' : 'current-month';
+            const currentMonthStr = document.getElementById(monthElement).textContent;
+            const [monthName, year] = currentMonthStr.split(' ');
+            const month = getMonthNumber(monthName);
+            
+            let newMonth = month - 1;
+            let newYear = parseInt(year);
+            
+            if (newMonth < 0) {
+                newMonth = 11;
+                newYear -= 1;
+            }
+            
+            document.getElementById(monthElement).textContent = `${getMonthName(newMonth)} ${newYear}`;
+            
+            if (tab === 'reports') {
+                updateReports();
+            } else {
+                updateExpensesList();
+            }
+        }
+        
+        // Next month
+        function nextMonth(tab = 'expenses') {
+            const monthElement = tab === 'reports' ? 'report-month' : 'current-month';
+            const currentMonthStr = document.getElementById(monthElement).textContent;
+            const [monthName, year] = currentMonthStr.split(' ');
+            const month = getMonthNumber(monthName);
+            
+            let newMonth = month + 1;
+            let newYear = parseInt(year);
+            
+            if (newMonth > 11) {
+                newMonth = 0;
+                newYear += 1;
+            }
+            
+            document.getElementById(monthElement).textContent = `${getMonthName(newMonth)} ${newYear}`;
+            
+            if (tab === 'reports') {
+                updateReports();
+            } else {
+                updateExpensesList();
+            }
+        }
+        
+        // Get month number from name
+        function getMonthNumber(name) {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            return months.findIndex(m => m.startsWith(name));
+        }
+        
+        // Get month name from number
+    
