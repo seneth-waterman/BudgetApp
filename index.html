@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4285f4">
+    <title>Simple Counter</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #f5f5f5; }
+        button { padding: 10px 20px; font-size: 16px; background-color: #4285f4; color: white; border: none; border-radius: 4px; }
+        #count { font-size: 60px; margin: 20px; }
+        .app-container { max-width: 300px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    </style>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNpbXBsZSBDb3VudGVyIiwKICAic2hvcnRfbmFtZSI6ICJDb3VudGVyIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmNWY1ZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjNDI4NWY0IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQRDk0Yld3Z2RtVnljMmx2YmowaU1TNHdJaUJsYm1OdlpHbHVaejBpZFhSbUxUZ2lQejQ4YzNabklIZHBaSFJvUFNJeE1EQWlJR2hsYVdkb2REMGlNVEF3SWlCMmFXVjNRbTk0UFNJd0lEQWdNVEF3SURFd01DSWdabWxzYkQwaWJtOXVaU0lnZUcxc2JuTTlJbWgwZEhBNkx5OTNkM2N1ZHpNdWIzSm5Mekl3TURBdmMzWm5JajQ4Y21WamRDQjNhV1IwYUQwaU1UQXdJaUJvWldsbmFIUTlJakV3TUNJZ1ptbHNiRDBpZFhKc0tDTm1iM0p0S1NJZ2MzUnliMnRsUFNKaWJHRmpheUlnYzNSeWIydGxMWGRwWkhSb1BTSXpJaUJ6ZEhKdmEyVXRhR1ZwWjJoMFBTSXpJajQ4TDNKbFkzUStQSEJoZEdnZ1ptbHNiQzF5ZFd4bFBTSmxkbVZ1SWlCamJHbHdMWEoxYkdVOUltVjJaVzVrYjJSa0lpQmtQU0pOTlRBdU5Dd3lOUzQwWXkweExqUXNNQzQzTFRNc01TNHpMVFF1TkN3eUxqUm9MVEUyTGpoakxURXVOQzB3TGpjdE15MHhMak10TkM0MExUSXVORXcxTUM0MExESTFMalJhSWo0OEwzQmhkR2crUEdScFozUWdZMnhoYzNNOUltSjFkSFJ2YmlJZ1ltRmphMmR5YjNWdVpEMGlJelF5T0RWbU5DSWdZMjlzYjNJOUluZG9hWFJsSWo0dEt6d3ZaR2xuZEQ0OEwzTjJaejQ9IiwKICAgICAgInNpemVzIjogIjE0NHgxNDQiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
+</head>
+<body>
+    <div class="app-container">
+        <h1>Seneth Counter</h1>
+        <div id="count">0</div>
+        <button onclick="incrementCount()">Click Me</button>
+        <p style="margin-top: 20px; font-size: 12px; color: #777;">Add to home screen to install as app</p>
+    </div>
+
+    <script>
+        // Counter functionality
+        let count = 0;
+        
+        function incrementCount() {
+            count++;
+            document.getElementById('count').textContent = count;
+            // Save count to localStorage
+            localStorage.setItem('counterValue', count);
+        }
+        
+        // Load saved count
+        window.onload = function() {
+            const savedCount = localStorage.getItem('counterValue');
+            if (savedCount !== null) {
+                count = parseInt(savedCount);
+                document.getElementById('count').textContent = count;
+            }
+        };
+        
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZnVuY3Rpb24oZXZlbnQpIHsKICBldmVudC53YWl0VW50aWwoc2VsZi5za2lwV2FpdGluZygpKTsKfSk7CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJywgZnVuY3Rpb24oZXZlbnQpIHsKICBldmVudC5yZXNwb25kV2l0aChmZXRjaChldmVudC5yZXF1ZXN0KSk7Cn0pOw==')
+                .then(function() {
+                    console.log('Service Worker Registered');
+                });
+        }
+    </script>
+</body>
+</html>
